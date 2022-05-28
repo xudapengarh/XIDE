@@ -58,10 +58,9 @@ protected:
     // 重载双击事件，屏蔽双击重命名
     void mouseDoubleClickEvent ( QMouseEvent * event) override;
 
-
 signals:
-    void openFile(QFileInfo fileInfo);
-    void closeFile(QFileInfo fileInfo);
+    void openFile(QFileInfo fileInfo);  // 打开文件
+    void closeFile(QFileInfo fileInfo); // 关闭文件
 
 private:
     void FindFile(QDir *path, QTreeWidgetItem *parent);
@@ -75,6 +74,7 @@ private slots:
     void addFile();         // 添加文件
     void deleteItem();      // 删除 item
     void renameItem();      // 重命名 item
+//    void onRenameItem();
     void searchInDir();     // 在目录中查找
     void searchInFile();    // 在文件中查找
     void openItemDir();     // 打开 item 所在的文件夹
