@@ -54,6 +54,11 @@ public:
     void OpenProject();
 
 
+protected:
+    // 重载双击事件，屏蔽双击重命名
+    void mouseDoubleClickEvent ( QMouseEvent * event) override;
+
+
 signals:
     void openFile(QFileInfo fileInfo);
     void closeFile(QFileInfo fileInfo);
