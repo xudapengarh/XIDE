@@ -63,7 +63,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     this->m_projectFileTreeView->Init("/Users/xudapeng/Desktop/Test2333");
 
-//    connect(this->m_projectFileTreeView, &ProjectFileTreeView::openFile, this->m_sourceCodeEditorView, &SourceCodeEditorView::onOpenFile);
+    connect(this->m_projectFileTreeView, static_cast<void(ProjectFileTreeView::*)(QFileInfo)>(&ProjectFileTreeView::openFile), this->m_sourceCodeEditorView, &SourceCodeEditorView::onOpenFile);
     connect(this->m_projectFileTreeView, &ProjectFileTreeView::closeFile, this->m_sourceCodeEditorView, &SourceCodeEditorView::onCloseFile);
 
 
