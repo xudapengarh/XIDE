@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>icons/icon_dir_open.svg</file>
+        <file>icons/icon_item_delete.svg</file>
+        <file>icons/icon_file_add.svg</file>
+        <file>icons/icon_dir_add.svg</file>
+        <file>icons/icon_dir.svg</file>
+        <file>icons/icon_file_ccpp.svg</file>
+        <file>icons/icon_file_txt.svg</file>
+        <file>icons/icon_file_c.svg</file>
+        <file>icons/icon_file_hpp.svg</file>
+        <file>icons/icon_file.svg</file>
+        <file>icons/icon_project.svg</file>
+    </qresource>
+</RCC>

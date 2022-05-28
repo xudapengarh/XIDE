@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100px" height="100px" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>img_folder_add</title>
+    <g id="img_folder_add" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M27,10 L50.464,28 L90,28 C95.5228475,28 100,32.4771525 100,38 L100,80 C100,85.4292399 95.6733292,89.8479317 90.2799048,89.9961582 L90,90 L10,90 C4.4771525,90 6.76353751e-16,85.5228475 0,80 L0,20 C-6.76353751e-16,14.4771525 4.4771525,10 10,10 L27,10 Z M53.2,42.208 L46.432,42.208 L46.432,56.968 L31.6,56.968 L31.6,63.736 L46.432,63.736 L46.432,78.568 L53.2,78.568 L53.2,63.736 L67.96,63.736 L67.96,56.968 L53.2,56.968 L53.2,42.208 Z" id="形状结合" fill="#FCCB16"></path>
+    </g>
+</svg>

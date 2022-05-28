@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/new/imags">
+        <file>img_dir.svg</file>
+        <file>img_project.svg</file>
+        <file>img_file.svg</file>
+        <file>img_cpp.svg</file>
+        <file>img_txt.svg</file>
+        <file>img_c.svg</file>
+        <file>img_hpp.svg</file>
+    </qresource>
+</RCC>
