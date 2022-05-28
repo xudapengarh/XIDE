@@ -81,9 +81,6 @@ ProjectFileTreeView::ProjectFileTreeView(QWidget *parent) : QTreeWidget(parent)
     this->m_fileMenu->addAction("重命名");
     this->m_fileMenu->addAction("删除");
     connect(this->m_fileMenu, &QMenu::triggered, this, &ProjectFileTreeView::onFileMenuTriggered);
-
-
-
 }
 
 void ProjectFileTreeView::Init(const QString &path)
@@ -134,7 +131,6 @@ void ProjectFileTreeView::OpenProject()
 
 void ProjectFileTreeView::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    qDebug() << "dakai";
     QString absolutePath = this->currentItem()->toolTip(0);
     QFileInfo fileInfo(absolutePath);
     if (fileInfo.isFile()){
@@ -232,32 +228,99 @@ void ProjectFileTreeView::onItemDoubleClicked(QTreeWidgetItem *item, int col)
 
 void ProjectFileTreeView::addDir()
 {
-    // 添加目录
-    QString absolutePath = this->m_currentItem->toolTip(0);
-    QFileInfo fileInfo(absolutePath);
-    if (fileInfo.isFile()){
-        absolutePath = this->m_currentItem->parent()->toolTip(0);
-        CreateNewDialog dialog(this);
-        dialog.CreateDir(absolutePath);
-        if(!dialog.GetAbsolutePath().isEmpty()){
-            QTreeWidgetItem *item = new QTreeWidgetItem(this->m_currentItem->parent());
-            QFileInfo fileInfo(dialog.GetAbsolutePath());
-            item->setIcon(0, GetIcon(fileInfo));
-            item->setText(0, dialog.GetRelativePath());
-            item->setToolTip(0, dialog.GetAbsolutePath());
-        }
+    // 获取父节点
+    QTreeWidgetItem *parent = nullptr;
+
+    if (QFileInfo(this->m_currentItem->toolTip(0)).isFile()){
+        // 当前节点为文件，则父节点为上级目录
+        parent = this->m_currentItem->parent();
     }
-    else if (fileInfo.isDir()){
-        CreateNewDialog dialog(this);
-        dialog.CreateDir(absolutePath);
-        if(!dialog.GetAbsolutePath().isEmpty()){
-            QTreeWidgetItem *item = new QTreeWidgetItem(this->m_currentItem);
-            QFileInfo fileInfo(dialog.GetAbsolutePath());
-            item->setIcon(0, GetIcon(fileInfo));
-            item->setText(0, dialog.GetRelativePath());
-            item->setToolTip(0, dialog.GetAbsolutePath());
-        }
+    else if (QFileInfo(this->m_currentItem->toolTip(0)).isDir()){
+        // 当前节点为目录，则父节点为当前节点
+        parent = this->m_currentItem;
     }
+    else{
+        return;
+    }
+
+    // 创建新节点，并添加到父节点中
+    QTreeWidgetItem *newItem = new QTreeWidgetItem(parent);
+
+    // 展开父节点
+    parent->setExpanded(true);
+    this->m_currentItem = newItem;
+    this->m_currentItem->setToolTip(0, parent->toolTip(0));
+    this->m_currentItem->setIcon(0, this->GetIcon(QFileInfo(parent->toolTip(0))));
+    this->m_currentItem->setFlags(this->m_currentItem->flags() | Qt::ItemIsEditable);
+
+    // 命名 item
+    this->editItem(this->m_currentItem);
+
+    // 为 item 的 itemChanged 事件创建响应链接
+    auto conn = std::make_shared<QMetaObject::Connection>();
+    *conn = connect(this, &ProjectFileTreeView::itemChanged, this, [this, conn](QTreeWidgetItem *item, int column){
+        // 删除 item 的 itemChanged 事件响应链接
+        disconnect(*conn);
+        this->m_currentItem = item;
+
+        if(this->m_currentItem->text(0).isEmpty()){
+            // 目录名为空，弹出提示，设置当前节点为新节点的父节点并移除新建的节点，
+            QMessageBox::information(nullptr, "提示", "目录名称不能为空！");
+            this->m_currentItem = item->parent();
+            item->parent()->removeChild(item);
+            delete item;
+            this->setCurrentItem(this->m_currentItem);
+            return;
+        }
+
+        // 新文件信息
+        QFileInfo newkFile(item->toolTip(0) + "/" + this->m_currentItem->text(0));
+
+        if(newkFile.exists()){
+            // 新文件已存在，弹出提示，设置当前节点为新节点的父节点并移除新建的节点，
+            QMessageBox::warning(nullptr, "创建新目录", newkFile.absoluteFilePath() + "\n目录已存在");
+            this->m_currentItem = item->parent();
+            item->parent()->removeChild(item);
+            delete item;
+            this->setCurrentItem(this->m_currentItem);
+            return;
+        }
+        else{
+            // 创建目录
+            QDir newDir;
+            newDir.mkdir(newkFile.absoluteFilePath());
+            item->setToolTip(0, newkFile.absoluteFilePath());
+            item->setIcon(0, this->GetIcon(newkFile));
+            this->setCurrentItem(this->m_currentItem);
+        }
+    });
+
+//    // 添加目录
+//    QString absolutePath = this->m_currentItem->toolTip(0);
+//    QFileInfo fileInfo(absolutePath);
+//    if (fileInfo.isFile()){
+//        absolutePath = this->m_currentItem->parent()->toolTip(0);
+//        CreateNewDialog dialog(this);
+//        dialog.CreateDir(absolutePath);
+//        if(!dialog.GetAbsolutePath().isEmpty()){
+//            QTreeWidgetItem *item = new QTreeWidgetItem(this->m_currentItem->parent());
+//            QFileInfo fileInfo(dialog.GetAbsolutePath());
+//            item->setIcon(0, GetIcon(fileInfo));
+//            item->setText(0, dialog.GetRelativePath());
+//            item->setToolTip(0, dialog.GetAbsolutePath());
+//        }
+//    }
+//    else if (fileInfo.isDir()){
+//        CreateNewDialog dialog(this);
+//        dialog.CreateDir(absolutePath);
+//        if(!dialog.GetAbsolutePath().isEmpty()){
+//            QTreeWidgetItem *item = new QTreeWidgetItem(this->m_currentItem);
+//            QFileInfo fileInfo(dialog.GetAbsolutePath());
+//            item->setIcon(0, GetIcon(fileInfo));
+//            item->setText(0, dialog.GetRelativePath());
+//            item->setToolTip(0, dialog.GetAbsolutePath());
+//        }
+//    }
 }
 
 void ProjectFileTreeView::openDir()
@@ -271,21 +334,27 @@ void ProjectFileTreeView::openDir()
 
 void ProjectFileTreeView::addFile()
 {
+    // 获取父节点
     QTreeWidgetItem *parent = nullptr;
+
     if (QFileInfo(this->m_currentItem->toolTip(0)).isFile()){
+        // 当前节点为文件，则父节点为上级目录
         parent = this->m_currentItem->parent();
     }
     else if (QFileInfo(this->m_currentItem->toolTip(0)).isDir()){
+        // 当前节点为目录，则父节点为当前节点
         parent = this->m_currentItem;
     }
     else{
         return;
     }
 
+    // 创建新节点，并添加到父节点中
     QTreeWidgetItem *newItem = new QTreeWidgetItem(parent);
+
+    // 展开父节点
     parent->setExpanded(true);
     this->m_currentItem = newItem;
-    //    this->setCurrentItem(this->m_currentItem);
     this->m_currentItem->setToolTip(0, parent->toolTip(0));
     this->m_currentItem->setIcon(0, this->GetIcon(QFileInfo("")));
     this->m_currentItem->setFlags(this->m_currentItem->flags() | Qt::ItemIsEditable);
@@ -301,7 +370,8 @@ void ProjectFileTreeView::addFile()
         this->m_currentItem = item;
 
         if(this->m_currentItem->text(0).isEmpty()){
-            QMessageBox::information(nullptr, "提示", "名称不能为空！");
+            // 文件名为空，弹出提示，设置当前节点为新节点的父节点并移除新建的节点，
+            QMessageBox::information(nullptr, "提示", "文件名称不能为空！");
             this->m_currentItem = item->parent();
             item->parent()->removeChild(item);
             delete item;
@@ -312,8 +382,8 @@ void ProjectFileTreeView::addFile()
         // 新文件信息
         QFileInfo newkFile(item->toolTip(0) + "/" + this->m_currentItem->text(0));
 
-        // 判断新文件是否已经存在
         if(newkFile.exists()){
+            // 新文件已存在，弹出提示，设置当前节点为新节点的父节点并移除新建的节点，
             QMessageBox::warning(nullptr, "创建新文件", newkFile.absoluteFilePath() + "\n文件已存在");
             this->m_currentItem = item->parent();
             item->parent()->removeChild(item);
@@ -322,7 +392,7 @@ void ProjectFileTreeView::addFile()
             return;
         }
         else{
-            // 重命名文件
+            // 创建文件
             QFile file(newkFile.absoluteFilePath());
             file.open(QIODevice::WriteOnly);
             file.close();
@@ -331,32 +401,6 @@ void ProjectFileTreeView::addFile()
             this->setCurrentItem(this->m_currentItem);
         }
     });
-    // 添加文件
-    //    QString absolutePath = this->m_currentItem->toolTip(0);
-    //    QFileInfo fileInfo(absolutePath);
-    //    if (fileInfo.isFile()){
-    //        absolutePath = this->m_currentItem->parent()->toolTip(0);
-    //        CreateNewDialog dialog(this);
-    //        dialog.CreateFile(absolutePath);
-    //        if(!dialog.GetAbsolutePath().isEmpty()){
-    //            QTreeWidgetItem *item = new QTreeWidgetItem(this->m_currentItem->parent());
-    //            QFileInfo fileInfo(dialog.GetAbsolutePath());
-    //            item->setIcon(0, GetIcon(fileInfo));
-    //            item->setText(0, dialog.GetRelativePath());
-    //            item->setToolTip(0, dialog.GetAbsolutePath());
-    //        }
-    //    }
-    //    else if (fileInfo.isDir()){
-    //        CreateNewDialog dialog(this);
-    //        dialog.CreateFile(absolutePath);
-    //        if(!dialog.GetAbsolutePath().isEmpty()){
-    //            QTreeWidgetItem *item = new QTreeWidgetItem(this->m_currentItem);
-    //            QFileInfo fileInfo(dialog.GetAbsolutePath());
-    //            item->setIcon(0, GetIcon(fileInfo));
-    //            item->setText(0, dialog.GetRelativePath());
-    //            item->setToolTip(0, dialog.GetAbsolutePath());
-    //        }
-    //    }
 }
 
 void ProjectFileTreeView::deleteItem()
