@@ -132,6 +132,17 @@ void ProjectFileTreeView::OpenProject()
     }
 }
 
+void ProjectFileTreeView::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    qDebug() << "dakai";
+    QString absolutePath = this->currentItem()->toolTip(0);
+    QFileInfo fileInfo(absolutePath);
+    if (fileInfo.isFile()){
+        // 打开文件
+        emit openFile(fileInfo);
+    }
+}
+
 
 
 void ProjectFileTreeView::FindFile(QDir *path, QTreeWidgetItem *parent)
@@ -260,32 +271,92 @@ void ProjectFileTreeView::openDir()
 
 void ProjectFileTreeView::addFile()
 {
+    QTreeWidgetItem *parent = nullptr;
+    if (QFileInfo(this->m_currentItem->toolTip(0)).isFile()){
+        parent = this->m_currentItem->parent();
+    }
+    else if (QFileInfo(this->m_currentItem->toolTip(0)).isDir()){
+        parent = this->m_currentItem;
+    }
+    else{
+        return;
+    }
+
+    QTreeWidgetItem *newItem = new QTreeWidgetItem(parent);
+    parent->setExpanded(true);
+    this->m_currentItem = newItem;
+    //    this->setCurrentItem(this->m_currentItem);
+    this->m_currentItem->setToolTip(0, parent->toolTip(0));
+    this->m_currentItem->setIcon(0, this->GetIcon(QFileInfo("")));
+    this->m_currentItem->setFlags(this->m_currentItem->flags() | Qt::ItemIsEditable);
+
+    // 命名 item
+    this->editItem(this->m_currentItem);
+
+    // 为 item 的 itemChanged 事件创建响应链接
+    auto conn = std::make_shared<QMetaObject::Connection>();
+    *conn = connect(this, &ProjectFileTreeView::itemChanged, this, [this, conn](QTreeWidgetItem *item, int column){
+        // 删除 item 的 itemChanged 事件响应链接
+        disconnect(*conn);
+        this->m_currentItem = item;
+
+        if(this->m_currentItem->text(0).isEmpty()){
+            QMessageBox::information(nullptr, "提示", "名称不能为空！");
+            this->m_currentItem = item->parent();
+            item->parent()->removeChild(item);
+            delete item;
+            this->setCurrentItem(this->m_currentItem);
+            return;
+        }
+
+        // 新文件信息
+        QFileInfo newkFile(item->toolTip(0) + "/" + this->m_currentItem->text(0));
+
+        // 判断新文件是否已经存在
+        if(newkFile.exists()){
+            QMessageBox::warning(nullptr, "创建新文件", newkFile.absoluteFilePath() + "\n文件已存在");
+            this->m_currentItem = item->parent();
+            item->parent()->removeChild(item);
+            delete item;
+            this->setCurrentItem(this->m_currentItem);
+            return;
+        }
+        else{
+            // 重命名文件
+            QFile file(newkFile.absoluteFilePath());
+            file.open(QIODevice::WriteOnly);
+            file.close();
+            item->setToolTip(0, newkFile.absoluteFilePath());
+            item->setIcon(0, this->GetIcon(newkFile));
+            this->setCurrentItem(this->m_currentItem);
+        }
+    });
     // 添加文件
-    QString absolutePath = this->m_currentItem->toolTip(0);
-    QFileInfo fileInfo(absolutePath);
-    if (fileInfo.isFile()){
-        absolutePath = this->m_currentItem->parent()->toolTip(0);
-        CreateNewDialog dialog(this);
-        dialog.CreateFile(absolutePath);
-        if(!dialog.GetAbsolutePath().isEmpty()){
-            QTreeWidgetItem *item = new QTreeWidgetItem(this->m_currentItem->parent());
-            QFileInfo fileInfo(dialog.GetAbsolutePath());
-            item->setIcon(0, GetIcon(fileInfo));
-            item->setText(0, dialog.GetRelativePath());
-            item->setToolTip(0, dialog.GetAbsolutePath());
-        }
-    }
-    else if (fileInfo.isDir()){
-        CreateNewDialog dialog(this);
-        dialog.CreateFile(absolutePath);
-        if(!dialog.GetAbsolutePath().isEmpty()){
-            QTreeWidgetItem *item = new QTreeWidgetItem(this->m_currentItem);
-            QFileInfo fileInfo(dialog.GetAbsolutePath());
-            item->setIcon(0, GetIcon(fileInfo));
-            item->setText(0, dialog.GetRelativePath());
-            item->setToolTip(0, dialog.GetAbsolutePath());
-        }
-    }
+    //    QString absolutePath = this->m_currentItem->toolTip(0);
+    //    QFileInfo fileInfo(absolutePath);
+    //    if (fileInfo.isFile()){
+    //        absolutePath = this->m_currentItem->parent()->toolTip(0);
+    //        CreateNewDialog dialog(this);
+    //        dialog.CreateFile(absolutePath);
+    //        if(!dialog.GetAbsolutePath().isEmpty()){
+    //            QTreeWidgetItem *item = new QTreeWidgetItem(this->m_currentItem->parent());
+    //            QFileInfo fileInfo(dialog.GetAbsolutePath());
+    //            item->setIcon(0, GetIcon(fileInfo));
+    //            item->setText(0, dialog.GetRelativePath());
+    //            item->setToolTip(0, dialog.GetAbsolutePath());
+    //        }
+    //    }
+    //    else if (fileInfo.isDir()){
+    //        CreateNewDialog dialog(this);
+    //        dialog.CreateFile(absolutePath);
+    //        if(!dialog.GetAbsolutePath().isEmpty()){
+    //            QTreeWidgetItem *item = new QTreeWidgetItem(this->m_currentItem);
+    //            QFileInfo fileInfo(dialog.GetAbsolutePath());
+    //            item->setIcon(0, GetIcon(fileInfo));
+    //            item->setText(0, dialog.GetRelativePath());
+    //            item->setToolTip(0, dialog.GetAbsolutePath());
+    //        }
+    //    }
 }
 
 void ProjectFileTreeView::deleteItem()
@@ -298,9 +369,10 @@ void ProjectFileTreeView::deleteItem()
         if(QMessageBox::Yes == QMessageBox::question(nullptr, "删除文件", absolutePath + "\n\n将被删除，是否确认操作？")){
             emit closeFile(fileInfo);
             QFile::remove(absolutePath);
-            this->m_currentItem->parent()->removeChild(this->m_currentItem);
-            delete this->m_currentItem;
-            this->m_currentItem = nullptr;
+            QTreeWidgetItem *item = this->m_currentItem;
+            this->m_currentItem = this->m_currentItem->parent();
+            this->m_currentItem->removeChild(item);
+            delete item;
         }
     }
     // 删除目录
@@ -333,9 +405,17 @@ void ProjectFileTreeView::deleteItem()
                 };
             }
             dir.removeRecursively();
-            this->m_currentItem->parent()->removeChild(this->m_currentItem);
-            delete this->m_currentItem;
-            this->m_currentItem = nullptr;
+            QTreeWidgetItem *item = this->m_currentItem;
+            if(item->parent()){
+                this->m_currentItem = this->m_currentItem->parent();
+                this->m_currentItem->removeChild(item);
+                delete item;
+            }
+            else{
+                this->m_currentItem->parent()->removeChild(this->m_currentItem);
+                delete this->m_currentItem;
+                this->m_currentItem = nullptr;
+            }
         }
     }
 }
@@ -354,6 +434,12 @@ void ProjectFileTreeView::renameItem()
 
         // 获取原文件全路径
         QFileInfo fileInfo(item->toolTip(0));
+
+        if(this->m_currentItem->text(0).isEmpty()){
+            QMessageBox::information(nullptr, "提示", "名称不能为空！");
+            item->setText(0, fileInfo.fileName());
+            return;
+        }
 
         // item 为文件
         if (fileInfo.isFile()){
@@ -384,7 +470,6 @@ void ProjectFileTreeView::renameItem()
                 item->setText(0, fileInfo.fileName());
             }
             else{
-
                 // 重命名目录
                 QDir dir;
                 dir.rename(fileInfo.absoluteFilePath(), newkFile.absoluteFilePath());
