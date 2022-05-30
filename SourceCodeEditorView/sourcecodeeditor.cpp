@@ -1,43 +1,32 @@
 #include <QKeyEvent>
+#include <QPlainTextEdit>
 #include <QDebug>
+#include <QScrollArea>
+#include <QHBoxLayout>
 
 #include "sourcecodeeditor.h"
 
-SourceCodeEditor::SourceCodeEditor(QWidget *parent)
+SourceCodeEditor::SourceCodeEditor(QWidget *parent) : QWidget(parent)
 {
+    this->m_editerArea = new SourceCodeEditorArea_bac(this);
+    this->m_lineArea = new SourceCodeLineArea(this);
 
+    QHBoxLayout *hlayout = new QHBoxLayout(this);
+    hlayout->addWidget(this->m_lineArea);
+    hlayout->addWidget(this->m_editerArea);
+    hlayout->setSpacing(0);
 }
 
-void SourceCodeEditor::onOpenFile(QFileInfo fileInfo)
+void SourceCodeEditor::OpenFile(QFileInfo fileInfo)
 {
-    this->m_currentFileInfo = fileInfo;
-    QFile file;
-    file.setFileName(fileInfo.absoluteFilePath());
-    if(file.open(QIODevice::ReadOnly))
-    {
-        //读文件
-        QByteArray array =  file.readAll();
-        //将数据写进文本框中
-        this->setPlainText(QString(array));
-        //        //一行一行的读
-        //        QByteArray array;
-        //        while(file.atEnd() == false)
-        //        {
-        //            array += file.readLine();
-        //        }
-        //        this->setPlainText(QString(array).toUtf8().data());
-
+    this->m_editerArea->OpenFile(fileInfo);
+    int lines = this->m_editerArea->document()->lineCount();
+    for (int i = 0; i < lines; i++){
+        this->m_lineArea->AddLine();
     }
-    file.close();
 }
 
-void SourceCodeEditor::onSaveFile()
+void SourceCodeEditor::SaveFile()
 {
-    QFile file;
-    file.setFileName(this->m_currentFileInfo.absoluteFilePath());
-    if(file.open(QIODevice::WriteOnly))
-    {
-        file.write(this->toPlainText().toUtf8());
-    }
-    file.close();
+
 }

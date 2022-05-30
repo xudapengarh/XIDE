@@ -5,19 +5,25 @@
 #include <QWidget>
 #include <QTextEdit>
 #include <QFileInfo>
+#include <QPlainTextEdit>
 
-class SourceCodeEditor : public QTextEdit
+#include "sourcecodelinearea.h"
+#include "sourcecodeeditorarea.h"
+
+class SourceCodeEditor : public QWidget
 {
     Q_OBJECT
 public:
-    SourceCodeEditor(QWidget *parent);
+    SourceCodeEditor(QWidget *parent = nullptr);
 
-public slots:
-    void onOpenFile(QFileInfo fileInfo);
-    void onSaveFile();
+    void OpenFile(QFileInfo fileInfo);
+
+    void SaveFile();
 
 private:
-    QFileInfo m_currentFileInfo;
+
+    SourceCodeEditorArea_bac *m_editerArea;
+    SourceCodeLineArea *m_lineArea;
 };
 
 #endif // SOURCECODEEDITOR_H

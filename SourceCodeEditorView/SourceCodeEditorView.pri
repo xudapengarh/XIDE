@@ -17,9 +17,13 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     $$PWD/sourcecodeeditor.h \
-    $$PWD/sourcecodeeditorview.h
+    $$PWD/sourcecodeeditorarea.h \
+    $$PWD/sourcecodeeditorview.h \
+    $$PWD/sourcecodelinearea.h
 
 SOURCES += \
     $$PWD/sourcecodeeditor.cpp \
-    $$PWD/sourcecodeeditorview.cpp
+    $$PWD/sourcecodeeditorarea.cpp \
+    $$PWD/sourcecodeeditorview.cpp \
+    $$PWD/sourcecodelinearea.cpp
 

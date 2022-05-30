@@ -1,6 +1,8 @@
 #include <QKeyEvent>
 #include <QDebug>
+#include <QScrollArea>
 #include "sourcecodeeditorview.h"
+#include "sourcecodeeditorarea.h"
 
 SourceCodeEditorView::SourceCodeEditorView(QWidget *parent) : QTabWidget(parent)
 {
@@ -17,10 +19,10 @@ void SourceCodeEditorView::onOpenFile(QFileInfo fileInfo)
         this->setCurrentWidget(this->m_openedEditor[fileInfo.absoluteFilePath()]);
     }
     else{
-        SourceCodeEditor *editor = new SourceCodeEditor(this);
+        SourceCodeEditorArea_bac *editor = new SourceCodeEditorArea_bac(this);
         this->m_openedEditor.insert(fileInfo.absoluteFilePath(), editor);
         this->insertTab(0, editor, fileInfo.fileName());
-        editor->onOpenFile(fileInfo);
+        editor->OpenFile(fileInfo);
         this->setCurrentWidget(editor);
     }
 
@@ -29,7 +31,7 @@ void SourceCodeEditorView::onOpenFile(QFileInfo fileInfo)
 void SourceCodeEditorView::onCloseFile(QFileInfo fileInfo)
 {
     if(this->m_openedEditor.contains(fileInfo.absoluteFilePath())){
-        SourceCodeEditor *editor = this->m_openedEditor[fileInfo.absoluteFilePath()];
+        SourceCodeEditorArea_bac *editor = this->m_openedEditor[fileInfo.absoluteFilePath()];
         this->removeTab(this->indexOf(editor));
         delete editor;
     }
