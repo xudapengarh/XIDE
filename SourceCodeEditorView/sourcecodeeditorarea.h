@@ -12,59 +12,48 @@
 
 #include <QDebug>
 
-#include "sourcecodelinearea.h"
 
-class SourceCodeEditorArea_bac : public QPlainTextEdit
+class EditorAreaSection{
+public:
+    EditorAreaSection(int begain = 0, int end = 0) : begain(begain) , end(end){}
+    inline bool Contains(int value) const {return value >= begain && value <= end;}
+    int begain;
+    int end;
+};
+
+typedef struct {
+    int totalBlockCount;
+    int topMargin;
+    int blockHeight;
+    EditorAreaSection validBlockNumberSection;
+    EditorAreaSection focusBlockNumberSection;
+}EditorAreaAttribute;
+
+class SourceCodeEditorArea : public QPlainTextEdit
 {
     Q_OBJECT
 public:
-    SourceCodeEditorArea_bac(QWidget *parent);
+    SourceCodeEditorArea(QWidget *parent = nullptr);
 
 public slots:
     void OpenFile(QFileInfo fileInfo);
     void SaveFile();
 
-
-    void lineNumberAreaPaintEvent(QPaintEvent *event);
-    int lineNumberAreaWidth();
+signals:
+    void lineAreaUpdate(const EditorAreaAttribute &);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
 
+
+
 private slots:
-    void updateLineNumberAreaWidth(int newBlockCount);
-    void updateLineNumberArea(const QRect &rect, int dy);
-
-
+    void onUpdateRequest(const QRect &rect, int dy);
 
 private:
     QFileInfo m_currentFileInfo;
-    QWidget *m_lineArea;
+
 };
 
-
-
-
-class LineNumberArea : public QWidget{
-    Q_OBJECT
-
-public:
-    LineNumberArea(SourceCodeEditorArea_bac *editor) : QWidget(editor) {
-        this->m_editorArea = editor;
-    }
-
-    QSize sizeHint() const override {
-        return QSize(this->m_editorArea->lineNumberAreaWidth(), 0);
-    }
-
-protected:
-    void paintEvent(QPaintEvent *event) override {
-        qDebug() << __FUNCTION__ << " height = " << this->height();
-        this->m_editorArea->lineNumberAreaPaintEvent(event);
-    }
-
-private:
-    SourceCodeEditorArea_bac *m_editorArea;
-};
 
 #endif // SOURCECODEEDITORAREA_H

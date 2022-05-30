@@ -9,35 +9,19 @@ int flag = 0;
 
 
 
-SourceCodeEditorArea_bac::SourceCodeEditorArea_bac(QWidget *parent) : QPlainTextEdit(parent)
+SourceCodeEditorArea::SourceCodeEditorArea(QWidget *parent) : QPlainTextEdit(parent)
 {
-    // 设置字体
-    QFont font;
-    font.setFamily("Courier");
-    font.setStyleHint(QFont::Monospace);
-    font.setFixedPitch(true);
-    font.setPointSize(14);
-    this->setFont(font);
 
     // 设置缩进
-    QFontMetrics metrics(font);
+    QFontMetrics metrics(this->font());
     this->setTabStopWidth(4 * metrics.width(" "));
 
-    // 创建行号控件
-    this->m_lineArea = new LineNumberArea(this);
+    connect(this, &SourceCodeEditorArea::updateRequest, this, &SourceCodeEditorArea::onUpdateRequest);
 
-    // 关联数据内容行数变化，重新计算行号控件宽度
-    connect(this, &SourceCodeEditorArea_bac::blockCountChanged, this, &SourceCodeEditorArea_bac::updateLineNumberAreaWidth);
 
-    // 关联更新信号
-    connect(this, &SourceCodeEditorArea_bac::updateRequest, this, &SourceCodeEditorArea_bac::updateLineNumberArea);
-    //    connect(this, &SourceCodeEditorArea::cursorPositionChanged, this, &SourceCodeEditorArea::highlightCurrentLine);
-
-    // 初始化行号控件
-    updateLineNumberAreaWidth(0);
 }
 
-void SourceCodeEditorArea_bac::OpenFile(QFileInfo fileInfo)
+void SourceCodeEditorArea::OpenFile(QFileInfo fileInfo)
 {
     this->m_currentFileInfo = fileInfo;
     QFile file;
@@ -58,6 +42,7 @@ void SourceCodeEditorArea_bac::OpenFile(QFileInfo fileInfo)
 
     }
     file.close();
+    emit updateRequest(this->rect(), 0);
 
     //    int lineCount = this->document()->lineCount();
     //    for(int  i = 0; i < lineCount; i++){
@@ -65,7 +50,7 @@ void SourceCodeEditorArea_bac::OpenFile(QFileInfo fileInfo)
     //    }
 }
 
-void SourceCodeEditorArea_bac::SaveFile()
+void SourceCodeEditorArea::SaveFile()
 {
     QFile file;
     file.setFileName(this->m_currentFileInfo.absoluteFilePath());
@@ -76,87 +61,45 @@ void SourceCodeEditorArea_bac::SaveFile()
     file.close();
 }
 
-void SourceCodeEditorArea_bac::lineNumberAreaPaintEvent(QPaintEvent *event)
+void SourceCodeEditorArea::resizeEvent(QResizeEvent *event)
 {
+    QPlainTextEdit::resizeEvent(event);
+    emit updateRequest(this->rect(), 0);
+}
 
-    qDebug() << __FUNCTION__ << " : " << flag++;
-    // 行号控件绘制
-    QPainter painter(this->m_lineArea);
-
-    // 获取第一个可视的 block (即可见范围内的第一行)
+void SourceCodeEditorArea::onUpdateRequest(const QRect &rect, int dy)
+{
+    EditorAreaAttribute att;
+    // 获取所有的 block 数量（用于计算行号 widget 的宽度）
+    att.totalBlockCount = this->blockCount();
+    att.totalBlockCount = att.totalBlockCount > 0 ? att.totalBlockCount : 1;
     QTextBlock block = firstVisibleBlock();
 
-    // 返回该 block 所在的行号（从 0 开始）
-    int blockNumber = block.blockNumber();
+    // 获取上边距
+    att.topMargin = (int) blockBoundingGeometry(block).translated(contentOffset()).top();
+
+    // 获取 block 的高度
+    att.blockHeight = (int) blockBoundingRect(block).height();
+    if (this->blockCount() == 1){
+        att.blockHeight -= att.topMargin;
+    }
+
+    // 获取第一个可见 block 的 number
+    att.validBlockNumberSection.begain = block.blockNumber() + 1;
 
 
-    int blockHeight = (int) blockBoundingRect(block).height();      // block 的高度
+    // 计算可见范围内的 block 数量
+    int validBlockCount = 0;
 
-    // 根据该 block 的大小计算显示行号的位置
-    int top = (int) blockBoundingGeometry(block).translated(contentOffset()).top();
-    int bottom = top + blockHeight;
 
-    // 计算可视范围内的 block 数量（行数）
-    while (block.isValid() && top <= event->rect().bottom()) {
-        if (block.isVisible() && bottom >= event->rect().top()) {
-            // 绘制行号
-            QString number = QString::number(blockNumber + 1);
-            painter.setPen(Qt::black);
-            painter.drawText(0, top, this->m_lineArea->width(), fontMetrics().height(),
-                             Qt::AlignRight, number);
-        }
-
+    while(block.isValid() && validBlockCount * att.blockHeight + att.topMargin < this->height()){
         block = block.next();
-        top = bottom;
-        bottom = top + blockHeight;
-        ++blockNumber;
+        validBlockCount ++;
     }
+    att.validBlockNumberSection.end = att.validBlockNumberSection.begain + validBlockCount - 1;
+
+    emit lineAreaUpdate(att);
 }
 
-int SourceCodeEditorArea_bac::lineNumberAreaWidth()
-{
-    qDebug() << __FUNCTION__ << " : " << flag++;
-    // 根据行数的位数计算行号显示区域的宽度
-    int digits = 1;
-    int max = qMax(1, blockCount());
-    while (max >= 10) {
-        max /= 10;
-        ++digits;
-    }
 
-    int space = 3 + fontMetrics().horizontalAdvance(QLatin1Char('9')) * digits;
-    return space;
-}
-
-void SourceCodeEditorArea_bac::resizeEvent(QResizeEvent *event)
-{
-    qDebug() << __FUNCTION__ << " : " << flag++;
-    QPlainTextEdit::resizeEvent(event);
-
-    QRect cr = contentsRect();
-
-    // 放置行号显示区域的位置
-    this->m_lineArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
-}
-
-void SourceCodeEditorArea_bac::updateLineNumberAreaWidth(int newBlockCount)
-{
-    qDebug() << __FUNCTION__ << " : " << flag++;
-    // 设置代码区域的左边距
-    setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
-}
-
-void SourceCodeEditorArea_bac::updateLineNumberArea(const QRect &rect, int dy)
-{
-    qDebug() << __FUNCTION__ << " : " << flag++;
-    // 根据代码滚动位置，滚动行号
-    if (dy)
-        this->m_lineArea->scroll(0, dy);
-    else
-        this->m_lineArea->update(0, rect.y(), this->m_lineArea->width(), rect.height());
-
-    if (rect.contains(viewport()->rect())){
-        updateLineNumberAreaWidth(0);
-    }
-}
 

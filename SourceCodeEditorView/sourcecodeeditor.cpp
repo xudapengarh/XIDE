@@ -5,25 +5,39 @@
 #include <QHBoxLayout>
 
 #include "sourcecodeeditor.h"
+#include "sourcecodeeditorarea.h"
+#include "sourcecodelinearea.h"
 
 SourceCodeEditor::SourceCodeEditor(QWidget *parent) : QWidget(parent)
 {
-    this->m_editerArea = new SourceCodeEditorArea_bac(this);
-    this->m_lineArea = new SourceCodeLineArea(this);
 
-    QHBoxLayout *hlayout = new QHBoxLayout(this);
-    hlayout->addWidget(this->m_lineArea);
-    hlayout->addWidget(this->m_editerArea);
-    hlayout->setSpacing(0);
+    // 设置字体
+    QFont font;
+    font.setFamily("Courier");
+    font.setStyleHint(QFont::Monospace);
+    font.setFixedPitch(true);
+    font.setPointSize(14);
+    this->setFont(font);
+
+    this->m_editorArea = new SourceCodeEditorArea(this);
+    this->m_lineArea = new SourceCodeLineArea(this);
+    this->m_editorArea->setFont(font);
+    this->m_lineArea->setFont(font);
+
+
+
+    connect(this->m_editorArea, &SourceCodeEditorArea::lineAreaUpdate, this->m_lineArea, &SourceCodeLineArea::onLineAreaUpdate);
+
+    QGridLayout *glayout = new QGridLayout(this);
+    glayout->addWidget(this->m_lineArea, 0, 0);
+    glayout->addWidget(this->m_editorArea, 0, 1);
+    glayout->setSpacing(0);
+    glayout->setMargin(0);
 }
 
 void SourceCodeEditor::OpenFile(QFileInfo fileInfo)
 {
-    this->m_editerArea->OpenFile(fileInfo);
-    int lines = this->m_editerArea->document()->lineCount();
-    for (int i = 0; i < lines; i++){
-        this->m_lineArea->AddLine();
-    }
+    this->m_editorArea->OpenFile(fileInfo);
 }
 
 void SourceCodeEditor::SaveFile()

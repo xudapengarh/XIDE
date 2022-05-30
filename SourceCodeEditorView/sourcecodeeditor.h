@@ -22,7 +22,7 @@ public:
 
 private:
 
-    SourceCodeEditorArea_bac *m_editerArea;
+    SourceCodeEditorArea *m_editorArea;
     SourceCodeLineArea *m_lineArea;
 };
 

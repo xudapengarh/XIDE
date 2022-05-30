@@ -23,7 +23,7 @@ public slots:
 
 private:
 
-    QMap<QString, SourceCodeEditorArea_bac*> m_openedEditor;
+    QMap<QString, SourceCodeEditor*> m_openedEditor;
 
 };
 

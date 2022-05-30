@@ -19,7 +19,7 @@ void SourceCodeEditorView::onOpenFile(QFileInfo fileInfo)
         this->setCurrentWidget(this->m_openedEditor[fileInfo.absoluteFilePath()]);
     }
     else{
-        SourceCodeEditorArea_bac *editor = new SourceCodeEditorArea_bac(this);
+        SourceCodeEditor *editor = new SourceCodeEditor(this);
         this->m_openedEditor.insert(fileInfo.absoluteFilePath(), editor);
         this->insertTab(0, editor, fileInfo.fileName());
         editor->OpenFile(fileInfo);
@@ -31,7 +31,7 @@ void SourceCodeEditorView::onOpenFile(QFileInfo fileInfo)
 void SourceCodeEditorView::onCloseFile(QFileInfo fileInfo)
 {
     if(this->m_openedEditor.contains(fileInfo.absoluteFilePath())){
-        SourceCodeEditorArea_bac *editor = this->m_openedEditor[fileInfo.absoluteFilePath()];
+        SourceCodeEditor *editor = this->m_openedEditor[fileInfo.absoluteFilePath()];
         this->removeTab(this->indexOf(editor));
         delete editor;
     }

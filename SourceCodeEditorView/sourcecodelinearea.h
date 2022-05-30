@@ -8,12 +8,11 @@
 
 #include <QVBoxLayout>
 
-class LineLabel : public QLabel{
-    Q_OBJECT
-public:
-    LineLabel(QWidget *parent = nullptr);
-    void SetSize(int width, int height);
-};
+
+#include "sourcecodeeditorarea.h"
+
+typedef QLabel LineItem;
+
 
 class SourceCodeLineArea : public QWidget
 {
@@ -22,21 +21,24 @@ public:
     SourceCodeLineArea(QWidget *parent = nullptr);
 
 
-public:
-    void SetLineHeight(int height);
-    void AddLine();
-    void RemoveLine();
+public slots:
+    void onLineAreaUpdate(const EditorAreaAttribute &att);
+
+
+protected:
+    void resizeEvent(QResizeEvent *event) override;
 
 private:
-    QVBoxLayout *m_vlayout;
+    void UpdateArea();
 
-    QFont m_fount;
 
-    int m_lineCount;
-    int m_labelWidth;
-    int m_labelHeight;
-
-    QVector<LineLabel *> m_lineLabels;
+private:
+    int m_topMargin;
+    int m_itemHeight;
+    int m_itemWidth;
+    bool m_inited;
+    EditorAreaAttribute m_att;
+    QList<QLabel *> m_itemList;         // 保存 item 的list
 };
 
 #endif // SOURCECODELINEAREA_H
