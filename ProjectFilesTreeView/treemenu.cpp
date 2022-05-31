@@ -170,7 +170,6 @@ void TreeMenu::itemPressedSlot(QTreeWidgetItem * pressedItem, int column){
 }
 // 右击菜单栏执行操作的具体方法
 void TreeMenu::tempActionInformation(QAction *act){
-    qDebug() << "Item " <<act->text();
     if(act->text()=="关闭项目"){
         QTreeWidgetItem *item = this->currentItem();
         QTreeWidgetItem* parItem=item->parent();
@@ -237,16 +236,14 @@ void TreeMenu::bulidNewFileSlot(bool /*flag*/){
     QString fileName = newFileWidget->fileNameEdit->text();
     QString filetype = newFileWidget->fileNameTypeBox->currentText();
     if(fileName==""){
-        QMessageBox::warning(this, tr("警告"),
-                             tr("文件名不能为空"));
+        QMessageBox::warning(this, tr("警告"),tr("文件名不能为空"));
         return;
     }
     QString tempName = fileName+filetype;
     QString path = nowItem->toolTip(0)+"/"+tempName;
     QFile file(path);
     if(file.exists()){
-        QMessageBox::warning(this, tr("警告"),
-                             tr("文件已存在"));
+        QMessageBox::warning(this, tr("警告"),tr("文件已存在"));
         return;
     }
     file.open(QIODevice::ReadWrite | QIODevice::Text);

@@ -392,7 +392,6 @@ void ProjectFileTreeView::deleteItem()
 
 void ProjectFileTreeView::renameItem()
 {
-    qDebug() << __FUNCTION__;
     // 修改 item
     this->editItem(this->m_currentItem);
 
@@ -549,7 +548,7 @@ QIcon ProjectFileTreeView::GetIcon(QFileInfo fileInfo)
     }
 
     if (fileSuffix == "txt"){
-        return QIcon(QPixmap("/icons/icons/icon_file_txt.svg"));
+        return QIcon(QPixmap(":/icons/icons/icon_file_txt.svg"));
     }
     return QIcon(QPixmap(":/icons/icons/icon_file.svg"));
 }
