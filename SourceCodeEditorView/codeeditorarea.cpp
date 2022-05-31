@@ -3,27 +3,25 @@
 #include <QPainter>
 #include <QTextBlock>
 
-#include "sourcecodeeditorarea.h"
+#include "codeeditorarea.h"
 
-int flag = 0;
-
-
-
-SourceCodeEditorArea::SourceCodeEditorArea(QWidget *parent) : QPlainTextEdit(parent)
+CodeEditorArea::CodeEditorArea(QWidget *parent) : QPlainTextEdit(parent)
 {
-
     // 设置缩进
     QFontMetrics metrics(this->font());
     this->setTabStopWidth(4 * metrics.width(" "));
 
-    connect(this, &SourceCodeEditorArea::updateRequest, this, &SourceCodeEditorArea::onUpdateRequest);
+    // 设置不自动换行
+    this->setLineWrapMode(QPlainTextEdit::NoWrap);
 
-
+    // 绑定更新事件
+    connect(this, &CodeEditorArea::updateRequest, this, &CodeEditorArea::onUpdateRequest);
 }
 
-void SourceCodeEditorArea::OpenFile(QFileInfo fileInfo)
+void CodeEditorArea::OpenFile(QFileInfo fileInfo)
 {
     this->m_currentFileInfo = fileInfo;
+
     QFile file;
     file.setFileName(fileInfo.absoluteFilePath());
     if(file.open(QIODevice::ReadOnly))
@@ -32,25 +30,14 @@ void SourceCodeEditorArea::OpenFile(QFileInfo fileInfo)
         QByteArray array =  file.readAll();
         //将数据写进文本框中
         this->setPlainText(QString(array));
-        //        //一行一行的读
-        //        QByteArray array;
-        //        while(file.atEnd() == false)
-        //        {
-        //            array += file.readLine();
-        //        }
-        //        this->setPlainText(QString(array).toUtf8().data());
-
     }
     file.close();
-    emit updateRequest(this->rect(), 0);
 
-    //    int lineCount = this->document()->lineCount();
-    //    for(int  i = 0; i < lineCount; i++){
-    //        this->m_lineArea->AddLine();
-    //    }
+    // 更新界面
+    emit updateRequest(this->rect(), 0);
 }
 
-void SourceCodeEditorArea::SaveFile()
+void CodeEditorArea::SaveFile()
 {
     QFile file;
     file.setFileName(this->m_currentFileInfo.absoluteFilePath());
@@ -61,13 +48,24 @@ void SourceCodeEditorArea::SaveFile()
     file.close();
 }
 
-void SourceCodeEditorArea::resizeEvent(QResizeEvent *event)
+void CodeEditorArea::resizeEvent(QResizeEvent *event)
 {
     QPlainTextEdit::resizeEvent(event);
+
+    // 更新
     emit updateRequest(this->rect(), 0);
 }
 
-void SourceCodeEditorArea::onUpdateRequest(const QRect &rect, int dy)
+void CodeEditorArea::keyPressEvent(QKeyEvent *event)
+{
+    if( (event ->modifiers()& Qt::ControlModifier) != 0 && event ->key() == Qt::Key_S ){
+        this->SaveFile();
+        return;
+    }
+    QPlainTextEdit::keyPressEvent( event );
+}
+
+void CodeEditorArea::onUpdateRequest(const QRect &rect, int dy)
 {
     EditorAreaAttribute att;
     // 获取所有的 block 数量（用于计算行号 widget 的宽度）
@@ -78,26 +76,24 @@ void SourceCodeEditorArea::onUpdateRequest(const QRect &rect, int dy)
     // 获取上边距
     att.topMargin = (int) blockBoundingGeometry(block).translated(contentOffset()).top();
 
-    // 获取 block 的高度
-    att.blockHeight = (int) blockBoundingRect(block).height();
-    if (this->blockCount() == 1){
-        att.blockHeight -= att.topMargin;
-    }
-
-    // 获取第一个可见 block 的 number
+    // 获取第一个可见范围内的 bolck 的 number
     att.validBlockNumberSection.begain = block.blockNumber() + 1;
+    att.validBlockNumberSection.end = block.blockNumber();
 
+    // 判断 block 位置是否超出可见范围内的底部
+    int validBlockBottom = att.topMargin;
 
-    // 计算可见范围内的 block 数量
-    int validBlockCount = 0;
+    while(block.isValid() && validBlockBottom < this->height()){
+        // 获取该 block 的高度
+        int blockHeight = (int) blockBoundingGeometry(block).translated(contentOffset()).height();
 
+        validBlockBottom += blockHeight;
+        att.blockHeight.append(blockHeight);
 
-    while(block.isValid() && validBlockCount * att.blockHeight + att.topMargin < this->height()){
         block = block.next();
-        validBlockCount ++;
-    }
-    att.validBlockNumberSection.end = att.validBlockNumberSection.begain + validBlockCount - 1;
 
+        att.validBlockNumberSection.end++;
+    }
     emit lineAreaUpdate(att);
 }
 

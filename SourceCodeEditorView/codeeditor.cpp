@@ -4,11 +4,11 @@
 #include <QScrollArea>
 #include <QHBoxLayout>
 
-#include "sourcecodeeditor.h"
-#include "sourcecodeeditorarea.h"
-#include "sourcecodelinearea.h"
+#include "codeeditor.h"
+#include "codeeditorarea.h"
+#include "codelinearea.h"
 
-SourceCodeEditor::SourceCodeEditor(QWidget *parent) : QWidget(parent)
+CodeEditor::CodeEditor(QWidget *parent) : QWidget(parent)
 {
 
     // 设置字体
@@ -19,14 +19,14 @@ SourceCodeEditor::SourceCodeEditor(QWidget *parent) : QWidget(parent)
     font.setPointSize(14);
     this->setFont(font);
 
-    this->m_editorArea = new SourceCodeEditorArea(this);
-    this->m_lineArea = new SourceCodeLineArea(this);
+    this->m_editorArea = new CodeEditorArea(this);
+    this->m_lineArea = new CodeLineArea(this);
     this->m_editorArea->setFont(font);
     this->m_lineArea->setFont(font);
 
 
 
-    connect(this->m_editorArea, &SourceCodeEditorArea::lineAreaUpdate, this->m_lineArea, &SourceCodeLineArea::onLineAreaUpdate);
+    connect(this->m_editorArea, &CodeEditorArea::lineAreaUpdate, this->m_lineArea, &CodeLineArea::onLineAreaUpdate);
 
     QGridLayout *glayout = new QGridLayout(this);
     glayout->addWidget(this->m_lineArea, 0, 0);
@@ -35,12 +35,12 @@ SourceCodeEditor::SourceCodeEditor(QWidget *parent) : QWidget(parent)
     glayout->setMargin(0);
 }
 
-void SourceCodeEditor::OpenFile(QFileInfo fileInfo)
+void CodeEditor::OpenFile(QFileInfo fileInfo)
 {
     this->m_editorArea->OpenFile(fileInfo);
 }
 
-void SourceCodeEditor::SaveFile()
+void CodeEditor::SaveFile()
 {
 
 }

@@ -1,5 +1,5 @@
-#ifndef SOURCECODEEDITORVIEW_H
-#define SOURCECODEEDITORVIEW_H
+#ifndef CODEEDITORMANGER_H
+#define CODEEDITORMANGER_H
 
 #include <QObject>
 #include <QWidget>
@@ -8,13 +8,13 @@
 #include <QTabWidget>
 #include <QMap>
 
-#include "sourcecodeeditor.h"
+#include "codeeditor.h"
 
-class SourceCodeEditorView : public QTabWidget
+class CodeEditorManger : public QTabWidget
 {
     Q_OBJECT
 public:
-    SourceCodeEditorView(QWidget *parent);
+    CodeEditorManger(QWidget *parent);
 
 public slots:
     void onOpenFile(QFileInfo fileInfo);
@@ -23,8 +23,8 @@ public slots:
 
 private:
 
-    QMap<QString, SourceCodeEditor*> m_openedEditor;
+    QMap<QString, CodeEditor*> m_openedEditor;
 
 };
 
-#endif // SOURCECODEEDITORVIEW_H
+#endif // CODEEDITORMANGER_H

@@ -1,5 +1,5 @@
-#ifndef SOURCECODEEDITOR_H
-#define SOURCECODEEDITOR_H
+#ifndef CODEEDITOR_H
+#define CODEEDITOR_H
 
 #include <QObject>
 #include <QWidget>
@@ -7,14 +7,14 @@
 #include <QFileInfo>
 #include <QPlainTextEdit>
 
-#include "sourcecodelinearea.h"
-#include "sourcecodeeditorarea.h"
+#include "codelinearea.h"
+#include "codeeditorarea.h"
 
-class SourceCodeEditor : public QWidget
+class CodeEditor : public QWidget
 {
     Q_OBJECT
 public:
-    SourceCodeEditor(QWidget *parent = nullptr);
+    CodeEditor(QWidget *parent = nullptr);
 
     void OpenFile(QFileInfo fileInfo);
 
@@ -22,8 +22,8 @@ public:
 
 private:
 
-    SourceCodeEditorArea *m_editorArea;
-    SourceCodeLineArea *m_lineArea;
+    CodeEditorArea *m_editorArea;
+    CodeLineArea *m_lineArea;
 };
 
-#endif // SOURCECODEEDITOR_H
+#endif // CODEEDITOR_H

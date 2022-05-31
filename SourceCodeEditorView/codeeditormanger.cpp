@@ -1,10 +1,10 @@
 #include <QKeyEvent>
 #include <QDebug>
 #include <QScrollArea>
-#include "sourcecodeeditorview.h"
-#include "sourcecodeeditorarea.h"
+#include "codeeditormanger.h"
+#include "codeeditorarea.h"
 
-SourceCodeEditorView::SourceCodeEditorView(QWidget *parent) : QTabWidget(parent)
+CodeEditorManger::CodeEditorManger(QWidget *parent) : QTabWidget(parent)
 {
     this->resize(600, 500);
     this->setTabsClosable(true);
@@ -12,14 +12,14 @@ SourceCodeEditorView::SourceCodeEditorView(QWidget *parent) : QTabWidget(parent)
     this->setUsesScrollButtons(true);
 }
 
-void SourceCodeEditorView::onOpenFile(QFileInfo fileInfo)
+void CodeEditorManger::onOpenFile(QFileInfo fileInfo)
 {
 
     if(this->m_openedEditor.contains(fileInfo.absoluteFilePath())){
         this->setCurrentWidget(this->m_openedEditor[fileInfo.absoluteFilePath()]);
     }
     else{
-        SourceCodeEditor *editor = new SourceCodeEditor(this);
+        CodeEditor *editor = new CodeEditor(this);
         this->m_openedEditor.insert(fileInfo.absoluteFilePath(), editor);
         this->insertTab(0, editor, fileInfo.fileName());
         editor->OpenFile(fileInfo);
@@ -28,16 +28,16 @@ void SourceCodeEditorView::onOpenFile(QFileInfo fileInfo)
 
 }
 
-void SourceCodeEditorView::onCloseFile(QFileInfo fileInfo)
+void CodeEditorManger::onCloseFile(QFileInfo fileInfo)
 {
     if(this->m_openedEditor.contains(fileInfo.absoluteFilePath())){
-        SourceCodeEditor *editor = this->m_openedEditor[fileInfo.absoluteFilePath()];
+        CodeEditor *editor = this->m_openedEditor[fileInfo.absoluteFilePath()];
         this->removeTab(this->indexOf(editor));
         delete editor;
     }
 }
 
-void SourceCodeEditorView::onSaveFile()
+void CodeEditorManger::onSaveFile()
 {
 
 }

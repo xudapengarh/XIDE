@@ -16,14 +16,14 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    $$PWD/sourcecodeeditor.h \
-    $$PWD/sourcecodeeditorarea.h \
-    $$PWD/sourcecodeeditorview.h \
-    $$PWD/sourcecodelinearea.h
+    $$PWD/codeeditor.h \
+    $$PWD/codeeditorarea.h \
+    $$PWD/codeeditormanger.h \
+    $$PWD/codelinearea.h
 
 SOURCES += \
-    $$PWD/sourcecodeeditor.cpp \
-    $$PWD/sourcecodeeditorarea.cpp \
-    $$PWD/sourcecodeeditorview.cpp \
-    $$PWD/sourcecodelinearea.cpp
+    $$PWD/codeeditor.cpp \
+    $$PWD/codeeditorarea.cpp \
+    $$PWD/codeeditormanger.cpp \
+    $$PWD/codelinearea.cpp
 

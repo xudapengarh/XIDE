@@ -1,58 +1,43 @@
 #include <QFont>
 
 
-#include "sourcecodelinearea.h"
+#include "codelinearea.h"
 
-SourceCodeLineArea::SourceCodeLineArea(QWidget *parent) : QWidget(parent)
+CodeLineArea::CodeLineArea(QWidget *parent) : QWidget(parent)
 {
     this->setMaximumWidth(10);
 
     // 初始化变量
-
-    this->m_topMargin = 0;
-    this->m_itemHeight = 0;             // item 高度
-    this->m_itemWidth = 0;              // item 宽度
+    this->m_letterWidth = 0;            // 字符宽度
 
     this->setMaximumWidth(0);
     this->setMinimumWidth(0);
-    this->m_inited = false;
 }
 
-void SourceCodeLineArea::onLineAreaUpdate(const EditorAreaAttribute &att)
+void CodeLineArea::onLineAreaUpdate(const EditorAreaAttribute &att)
 {
+    // 获取更新范围内的 block 的信息
     this->m_att = att;
-    this->m_inited = true;
 
-    bool updateFlag = false;
-    if (this->m_itemHeight != att.blockHeight){
-        this->m_itemHeight = att.blockHeight;
-        updateFlag = true;
-    }
+    // 计算字符宽度
+    this->m_letterWidth = fontMetrics().horizontalAdvance(QLatin1Char('9'));
 
-    int letterWidth = fontMetrics().horizontalAdvance(QLatin1Char('9'));
-    int digits = 1;
-
+    // 通过代码文件的总行数的位数，计算代码行号区域的宽度
+    int areaWidth = 3 * this->m_letterWidth;
     int totalCount = att.totalBlockCount;
     while (totalCount >= 10) {
         totalCount /= 10;
-        ++digits;
+        areaWidth += this->m_letterWidth;
+    }
+    if(this->width() != areaWidth){
+        this->setMaximumWidth(areaWidth);
+        this->setMinimumWidth(areaWidth);
     }
 
+    // 更新代码行号区域
+    this->UpdateArea();
 
-    if (digits * letterWidth + letterWidth != this->m_itemWidth){
-        this->m_itemWidth = digits * letterWidth + letterWidth;
-        updateFlag = true;
-    }
-
-    if (att.topMargin != this->m_topMargin){
-        this->m_topMargin = att.topMargin;
-        updateFlag = true;
-    }
-
-    if (updateFlag){
-        this->UpdateArea();
-    }
-
+    // 写入行号信息
     for (int i = 0, lineNumber = att.validBlockNumberSection.begain; i < this->m_itemList.count(); i++, lineNumber++){
         if (att.validBlockNumberSection.Contains(lineNumber)){
             this->m_itemList.at(i)->setText(QString::number(lineNumber));
@@ -63,34 +48,39 @@ void SourceCodeLineArea::onLineAreaUpdate(const EditorAreaAttribute &att)
     }
 }
 
-void SourceCodeLineArea::resizeEvent(QResizeEvent *event)
+void CodeLineArea::resizeEvent(QResizeEvent *event)
 {
     QWidget::resizeEvent(event);
+
     this->UpdateArea();
-    if (this->m_inited){
+    if (this->width() > 0){
         this->onLineAreaUpdate(this->m_att);
     }
 }
 
-void SourceCodeLineArea::UpdateArea()
+
+void CodeLineArea::UpdateArea()
 {
-    if (this->m_itemHeight > 0 && this->m_itemHeight > 0){
-        this->setMaximumWidth(this->m_itemWidth);
-        this->setMinimumWidth(this->m_itemWidth);
-        int bottom = this->m_topMargin + 1;
+    // 更细行号信息
+    if (this->width() > 0){
+        int bottom = this->m_att.topMargin;
+
+        // 清空原有的行号信息
         for (int i = this->m_itemList.count() - 1; i >= 0; i--){
             LineItem *item = this->m_itemList[i];
             item->setVisible(false);
             this->m_itemList.removeAt(i);
             delete item;
         }
-        while(bottom < this->height()){
+
+        // 重新生成行号信息的 item
+        for (int i = 0; i < this->m_att.blockHeight.count(); i++){
             LineItem *item = new LineItem(this);
-            item->setAlignment(Qt::AlignRight);
-            item->setGeometry(0, bottom, this->m_itemWidth -  fontMetrics().horizontalAdvance(QLatin1Char('9')), this->m_itemHeight);
+            item->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+            item->setGeometry(this->m_letterWidth, bottom, this->width() - 2 * this->m_letterWidth, this->m_att.blockHeight[i]);
             item->show();
-            bottom += this->m_itemHeight;
             this->m_itemList.append(item);
+            bottom += this->m_att.blockHeight[i];
         }
     }
 }
