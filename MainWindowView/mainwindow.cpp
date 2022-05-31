@@ -7,7 +7,7 @@
 #include "mainwindow.h"
 
 #include "../ProjectFilesTreeView/projectfiletreeview.h"
-#include "../SourceCodeEditorView/sourcecodeeditorview.h"
+#include "../SourceCodeEditorView/codeeditormanger.h"
 #include "../GDBControllerView/gdbcontrollerview.h"
 #include "../ExpressionBrowserView/expressionbrowserview.h"
 #include "../MassageBrowserView/massagebrowserview.h"
@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
     this->resize(1200, 800);
     this->m_projectFileTreeView = new ProjectFileTreeView(this);
     this->m_projectFileTreeView ->resize(100, 800);
-    this->m_sourceCodeEditorView = new SourceCodeEditorView(this);
+    this->m_sourceCodeEditorView = new CodeEditorManger(this);
     this->m_gdbControllerView = new GDBControllerView(this);
     this->m_massageBrowserView = new MassageBrowserView(this);
     this->m_variablesBrowserView = new VariablesBrowserView(this);
@@ -63,8 +63,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     this->m_projectFileTreeView->Init("/Users/xudapeng/Desktop/Test2333");
 
-    connect(this->m_projectFileTreeView, static_cast<void(ProjectFileTreeView::*)(QFileInfo)>(&ProjectFileTreeView::openFile), this->m_sourceCodeEditorView, &SourceCodeEditorView::onOpenFile);
-    connect(this->m_projectFileTreeView, &ProjectFileTreeView::closeFile, this->m_sourceCodeEditorView, &SourceCodeEditorView::onCloseFile);
+    connect(this->m_projectFileTreeView, static_cast<void(ProjectFileTreeView::*)(QFileInfo)>(&ProjectFileTreeView::openFile), this->m_sourceCodeEditorView, &CodeEditorManger::onOpenFile);
+    connect(this->m_projectFileTreeView, &ProjectFileTreeView::closeFile, this->m_sourceCodeEditorView, &CodeEditorManger::onCloseFile);
 
 
 //    this->m_project_file_tree_view->CreateTopItem("/Users/xudapeng/Projects/CLionProjects");
