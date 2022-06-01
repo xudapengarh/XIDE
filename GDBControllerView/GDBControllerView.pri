@@ -16,7 +16,16 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    $$PWD/gdbcontrollerview.h
+    $$PWD/buildanddebugtools.h \
+    $$PWD/debugtool.h \
+#    $$PWD/gdbcontrollerview.h \
+    $$PWD/runtool.h
 
 SOURCES += \
-    $$PWD/gdbcontrollerview.cpp
+    $$PWD/buildanddebugtools.cpp \
+    $$PWD/debugtool.cpp \
+#    $$PWD/gdbcontrollerview.cpp \
+    $$PWD/runtool.cpp
+
+RESOURCES += \
+    $$PWD/GDBResources.qrc

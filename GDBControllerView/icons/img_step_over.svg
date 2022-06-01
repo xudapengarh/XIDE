@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100px" height="100px" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>img_step_over</title>
+    <g id="img_step_over" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="矩形" fill="#5DBE8A" x="30" y="10" width="70" height="16" rx="7.5"></rect>
+        <rect id="矩形" fill="#5DBE8A" x="30" y="42" width="70" height="16" rx="7.5"></rect>
+        <rect id="矩形" fill="#5DBE8A" x="8" y="10" width="15" height="64" rx="7.5"></rect>
+        <rect id="矩形" fill="#5DBE8A" x="30" y="74" width="70" height="16" rx="7.5"></rect>
+        <polygon id="三角形" fill="#5DBE8A" transform="translate(15.000000, 78.000000) rotate(180.000000) translate(-15.000000, -78.000000) " points="15 66 30 90 2.13162821e-14 90"></polygon>
+    </g>
+</svg>
