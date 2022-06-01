@@ -8,7 +8,7 @@
 
 #include "../ProjectFilesTreeView/projectfiletreeview.h"
 #include "../SourceCodeEditorView/codeeditormanger.h"
-#include "../GDBControllerView/gdbcontrollerview.h"
+#include "../GDBControllerView/buildanddebugtools.h"
 #include "../ExpressionBrowserView/expressionbrowserview.h"
 #include "../MassageBrowserView/massagebrowserview.h"
 #include "../VariablesBrowserView/variablesbrowserview.h"
@@ -20,12 +20,13 @@ MainWindow::MainWindow(QWidget *parent)
 {
     this->resize(1200, 800);
     this->m_projectFileTreeView = new ProjectFileTreeView(this);
-    this->m_projectFileTreeView ->resize(100, 800);
+
     this->m_sourceCodeEditorView = new CodeEditorManger(this);
-    this->m_gdbControllerView = new GDBControllerView(this);
-    this->m_massageBrowserView = new MassageBrowserView(this);
-    this->m_variablesBrowserView = new VariablesBrowserView(this);
-    this->m_expressionBrowserView = new ExpressionBrowserView(this);
+    this->m_gdbControllerView = new BuildAndDebugTools(this);
+
+//    this->m_massageBrowserView = new MassageBrowserView(this);
+//    this->m_variablesBrowserView = new VariablesBrowserView(this);
+//    this->m_expressionBrowserView = new ExpressionBrowserView(this);
 
     QSplitter *hlayout = new QSplitter(Qt::Horizontal, 0);
     hlayout->addWidget(this->m_projectFileTreeView);
@@ -34,23 +35,25 @@ MainWindow::MainWindow(QWidget *parent)
         QSplitter *vlayout = new QSplitter(Qt::Vertical, 0);
         vlayout->addWidget(this->m_sourceCodeEditorView);
         vlayout->addWidget(this->m_gdbControllerView);
-        vlayout->addWidget(this->m_massageBrowserView);
-        vlayout->setStretchFactor(0, 75);
-        vlayout->setStretchFactor(1, 5);
-        vlayout->setStretchFactor(2, 20);
+//        vlayout->addWidget(this->m_massageBrowserView);
+        vlayout->setStretchFactor(0, 70);
+        vlayout->setStretchFactor(1, 30);
+//        vlayout->setStretchFactor(2, 30);
         hlayout->addWidget(vlayout);
     }
 
-    {
-        QSplitter *vlayout = new QSplitter(Qt::Vertical, 0);
-        vlayout->addWidget(this->m_variablesBrowserView);
-        vlayout->addWidget(this->m_expressionBrowserView);
-        hlayout->addWidget(vlayout);
-    }
+//    {
+//        QSplitter *vlayout = new QSplitter(Qt::Vertical, 0);
+//        vlayout->addWidget(this->m_variablesBrowserView);
+//        vlayout->addWidget(this->m_expressionBrowserView);
+//        hlayout->addWidget(vlayout);
+//    }
 
-    hlayout->setStretchFactor(0, 20);
-    hlayout->setStretchFactor(1, 60);
-    hlayout->setStretchFactor(2, 20);
+    hlayout->setStretchFactor(0, 30);
+    hlayout->setStretchFactor(1, 70);
+//    hlayout->setStretchFactor(2, 20);
+
+
     this->setCentralWidget(hlayout);
 
     this->m_menuBar = new QMenuBar(this);
@@ -66,8 +69,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this->m_projectFileTreeView, static_cast<void(ProjectFileTreeView::*)(QFileInfo)>(&ProjectFileTreeView::openFile), this->m_sourceCodeEditorView, &CodeEditorManger::onOpenFile);
     connect(this->m_projectFileTreeView, &ProjectFileTreeView::closeFile, this->m_sourceCodeEditorView, &CodeEditorManger::onCloseFile);
 
+    connect(this->m_sourceCodeEditorView, &CodeEditorManger::currentCodeFileChanged, this->m_gdbControllerView, &BuildAndDebugTools::onCurrentCodeFileChanged);
 
-//    this->m_project_file_tree_view->CreateTopItem("/Users/xudapeng/Projects/CLionProjects");
+//    connect(this->m_gdbControllerView, &BuildAndDebugTools::massageSend, this->m_massageBrowserView, &MassageBrowserView::onShowMassage);
 }
 
 MainWindow::~MainWindow()
