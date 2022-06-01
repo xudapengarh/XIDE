@@ -16,15 +16,17 @@ class CodeEditorManger : public QTabWidget
 public:
     CodeEditorManger(QWidget *parent);
 
+signals:
+    void currentCodeFileChanged(const QFileInfo &);
+
 public slots:
     void onOpenFile(QFileInfo fileInfo);
     void onCloseFile(QFileInfo fileInfo);
-    void onSaveFile();
 
 private:
 
     QMap<QString, CodeEditor*> m_openedEditor;
-
+    QFileInfo m_currentCodeFile;
 };
 
 #endif // CODEEDITORMANGER_H

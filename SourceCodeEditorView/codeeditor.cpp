@@ -38,9 +38,5 @@ CodeEditor::CodeEditor(QWidget *parent) : QWidget(parent)
 void CodeEditor::OpenFile(QFileInfo fileInfo)
 {
     this->m_editorArea->OpenFile(fileInfo);
-}
-
-void CodeEditor::SaveFile()
-{
-
+    this->m_codeFileInfo = fileInfo;
 }

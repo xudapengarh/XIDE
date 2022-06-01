@@ -15,15 +15,15 @@ class CodeEditor : public QWidget
     Q_OBJECT
 public:
     CodeEditor(QWidget *parent = nullptr);
-
     void OpenFile(QFileInfo fileInfo);
 
-    void SaveFile();
+    inline QFileInfo GetCodeFileInfo(){return this->m_codeFileInfo;}
 
 private:
-
     CodeEditorArea *m_editorArea;
     CodeLineArea *m_lineArea;
+
+    QFileInfo m_codeFileInfo;
 };
 
 #endif // CODEEDITOR_H
