@@ -23,3 +23,5 @@ include ($$PWD/MainWindowView/MainWindowView.pri)
 include ($$PWD/MassageBrowserView/MassageBrowserView.pri)
 include ($$PWD/VariablesBrowserView/VariablesBrowserView.pri)
 include ($$PWD/ExpressionBrowserView/ExpressionBrowserView.pri)
+
+RESOURCES +=
