@@ -17,14 +17,18 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     $$PWD/buildanddebugtools.h \
+    $$PWD/debuger.h \
     $$PWD/debugtool.h \
 #    $$PWD/gdbcontrollerview.h \
+    $$PWD/lldbdebuger.h \
     $$PWD/runtool.h
 
 SOURCES += \
     $$PWD/buildanddebugtools.cpp \
+    $$PWD/debuger.cpp \
     $$PWD/debugtool.cpp \
 #    $$PWD/gdbcontrollerview.cpp \
+    $$PWD/lldbdebuger.cpp \
     $$PWD/runtool.cpp
 
 RESOURCES += \
