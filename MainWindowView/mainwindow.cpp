@@ -64,7 +64,7 @@ MainWindow::MainWindow(QWidget *parent)
     fileMenu->addAction("最近使用的项目");
     connect(fileMenu, &QMenu::triggered, this, &MainWindow::onFileMenuTriggered);
 
-    this->m_projectFileTreeView->Init("/Users/xudapeng/Desktop/Test2333");
+    this->m_projectFileTreeView->Init("/Users/xudapeng/Projects/GDBTest/");
 
     connect(this->m_projectFileTreeView, static_cast<void(ProjectFileTreeView::*)(QFileInfo)>(&ProjectFileTreeView::openFile), this->m_sourceCodeEditorView, &CodeEditorManger::onOpenFile);
     connect(this->m_projectFileTreeView, &ProjectFileTreeView::closeFile, this->m_sourceCodeEditorView, &CodeEditorManger::onCloseFile);
