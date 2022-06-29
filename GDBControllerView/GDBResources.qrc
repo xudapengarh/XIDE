@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/GDB_Icons">
+        <file>icons/img_src.svg</file>
+        <file>icons/img_asm.svg</file>
+        <file>icons/img_debug.svg</file>
+        <file>icons/img_run.svg</file>
+        <file>icons/img_step_into.svg</file>
+        <file>icons/img_step_to.svg</file>
+        <file>icons/img_step_out.svg</file>
+        <file>icons/img_step_over.svg</file>
+        <file>icons/img_continue.svg</file>
+        <file>icons/img_stop.svg</file>
+    </qresource>
+</RCC>
