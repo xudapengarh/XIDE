@@ -20,7 +20,9 @@ HEADERS += \
     $$PWD/debuger.h \
     $$PWD/debugtool.h \
 #    $$PWD/gdbcontrollerview.h \
+    $$PWD/framevariablebrowser.h \
     $$PWD/lldbdebuger.h \
+    $$PWD/registerbrowser.h \
     $$PWD/runtool.h
 
 SOURCES += \
@@ -28,7 +30,9 @@ SOURCES += \
     $$PWD/debuger.cpp \
     $$PWD/debugtool.cpp \
 #    $$PWD/gdbcontrollerview.cpp \
+    $$PWD/framevariablebrowser.cpp \
     $$PWD/lldbdebuger.cpp \
+    $$PWD/registerbrowser.cpp \
     $$PWD/runtool.cpp
 
 RESOURCES += \

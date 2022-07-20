@@ -29,7 +29,7 @@ signals:
 private slots:
     void onCompliedProcessReadOutput();     // 编译进程正常输出事件处理函数
     void onCompliedProcessReadError();      // 编译进程错误输出事件处理函数
-    void onDebugProcessReadOutput();        // 调试进程输出事件处理函数
+//    void onDebugProcessReadOutput();        // 调试进程输出事件处理函数
 
 private slots:
     void onDebug();                         // 运行按钮点击事件处理函数
@@ -38,7 +38,18 @@ private slots:
     void onStepInto();                      // 进入按钮点击事件处理函数
     void onStepOut();                       // 跳出按钮点击事件处理函数
     void onStepTo();                        // 运行至按钮点击事件处理函数
-    void onAsm();
+    void onAsm();                           // 汇编代码模式
+
+signals:
+    void updateFrame(const FrameInfo &frame);
+    void updateRegisters(const RegisterGroup &registers);
+    void updateFrameVariable(const FrameVariable &variables);
+
+private slots:
+    void onUpdateFrame(const FrameInfo &frame);
+    void onUpdateRegisters(const RegisterGroup &registers);
+    void onUpdateFrameVariable(const FrameVariable &variables);
+
 
 signals:
     void compliteFinished();                // 编译进程结束信号
@@ -48,7 +59,6 @@ private:
     void Complie();                             // 编译
     void DebugTarget();                         // 启动调试进程
     void SetExtendButtonVisible(bool visible);  // 设置调试所用到的相关扩展按钮可见性
-
 
 private:
     QPushButton *m_debug;       // 开始调试
@@ -66,20 +76,14 @@ private:
     // gcc 进程
     QProcess *m_complieProcess;
 
-    // 调试进程
-    QProcess *m_debugProcess;
+    // 调试器
+    Debuger *m_debuger;
 
     // 编译成功标识
     bool m_complieSucessed;
 
     // 事件循环
     QEventLoop *m_eventLoop;
-
-    QByteArray m_standardOutput;
-
-    QString m_inbuffer;
-
-    Debuger *m_debuger;
 };
 
 #endif // DEBUGTOOL_H

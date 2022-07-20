@@ -96,29 +96,27 @@ DebugTool::DebugTool(QWidget *parent) : QWidget(parent)
         emit compliteFinished();
     });
 
-    // 目标程序运行进程
-    this->m_debugProcess = new QProcess(this);
-    connect(this->m_debugProcess, &QProcess::readyReadStandardOutput, this, &DebugTool::onDebugProcessReadOutput);
-    connect(this->m_debugProcess, static_cast<void(QProcess::*)(int)>(&QProcess::finished), this, [=](int exitCode){
-        qDebug() << "debug finished";
-        emit debugFinished();
-    });
+    // 调试器
+    this->m_debuger = new LLDBDebuger(this);
+    connect(this->m_debuger, &Debuger::updateFrame, this, &DebugTool::onUpdateFrame);
+    connect(this->m_debuger, &Debuger::updateRegisters, this, &DebugTool::onUpdateRegisters);
+    connect(this->m_debuger, &Debuger::updateFrameVariable, this, &DebugTool::onUpdateFrameVariable);
 
     // 初始化编译成功标识
     this->m_complieSucessed = false;
 
-    this->m_debuger = new LLDBDebuger(this);
+
 }
 
 void DebugTool::onDebug()
 {
-    if(this->m_complieProcess->state() == QProcess::Running || this->m_debugProcess->state() == QProcess::Running){
+    if(this->m_complieProcess->state() == QProcess::Running || this->m_debuger->state() == QProcess::Running){
         // 设置按钮图标为关闭
         if (this->m_complieProcess->state() == QProcess::Running){  // 编译进程运行中，关闭编译进程
             this->m_complieProcess->kill();
         }
-        if (this->m_debugProcess->state() == QProcess::Running){   // 目标程序运行中，关闭目标程序
-            this->m_debugProcess->kill();
+        if (this->m_debuger->state() == QProcess::Running){   // 目标程序运行中，关闭目标程序
+            this->m_debuger->kill();
         }
         this->m_debug->setIcon(QIcon(QPixmap(":/GDB_Icons/icons/img_debug.svg")));
         this->m_debug->setToolTip("Start Debug");
@@ -138,51 +136,52 @@ void DebugTool::onDebug()
 
 void DebugTool::onContinue()
 {
-    if (this->m_debugProcess->state() == QProcess::Running){
-        this->m_debugProcess->write("continue\n");
-        this->m_debugProcess->waitForBytesWritten();
-    }
+    this->m_debuger->Continue();
 }
 
 void DebugTool::onStepOver()
 {
-    if (this->m_debugProcess->state() == QProcess::Running){
-        this->m_debugProcess->write("next\n");
-        this->m_debugProcess->waitForBytesWritten();
-    }
+    this->m_debuger->Next();
 }
 
 void DebugTool::onStepInto()
 {
-    if (this->m_debugProcess->state() == QProcess::Running){
-        this->m_debugProcess->write("step\n");
-        this->m_debugProcess->waitForBytesWritten();
-    }
+    this->m_debuger->Step();
 }
 
 void DebugTool::onStepOut()
 {
-    if (this->m_debugProcess->state() == QProcess::Running){
-        this->m_debugProcess->write("finish\n");
-        this->m_debugProcess->waitForBytesWritten();
-    }
+    this->m_debuger->StepOut();
 }
 
 void DebugTool::onStepTo()
 {
-    if (this->m_debugProcess->state() == QProcess::Running){
-        this->m_debugProcess->write("continue\n");
-        this->m_debugProcess->waitForBytesWritten();
-    }
+    this->m_debuger->StepOut();
 }
 
 void DebugTool::onAsm()
 {
-    if (this->m_debugProcess->state() == QProcess::Running){
+//    if (this->m_debugProcess->state() == QProcess::Running){
 
-        this->m_debugProcess->write("register read -all\n");
-        this->m_debugProcess->waitForBytesWritten();
-    }
+//        this->m_debugProcess->write("register read -all\n");
+//        this->m_debugProcess->waitForBytesWritten();
+//    }
+    this->m_debuger->SetFrameType(FrameType::ASM);
+}
+
+void DebugTool::onUpdateFrame(const FrameInfo &frame)
+{
+    emit updateFrame(frame);
+}
+
+void DebugTool::onUpdateRegisters(const RegisterGroup &registers)
+{
+    emit updateRegisters(registers);
+}
+
+void DebugTool::onUpdateFrameVariable(const FrameVariable &variables)
+{
+    emit updateFrameVariable(variables);
 }
 
 void DebugTool::onCompliedProcessReadOutput()
@@ -201,25 +200,25 @@ void DebugTool::onCompliedProcessReadError()
     emit compliteFinished();
 }
 
-void DebugTool::onDebugProcessReadOutput()
-{
-    qDebug() << __FUNCTION__;
-    QByteArray outba = this->m_debugProcess->readAllStandardOutput();
-    QString out = QString::fromUtf8(outba);
-    QStringList lines = out.split('\n');
-    for (int i = 0; i < lines.size(); i++){
-        if(lines[i].contains("frame")){
-            i = this->m_debuger->AnalysisFrameInfo(lines, i);
-            continue;
-        }
-        if(lines[i].contains("General Purpose Registers:")){
-            i = this->m_debuger->AnalysisRegisterInfo(lines, i);
-            continue;
-        }
-    }
-    m_inbuffer.append(out);
-    emit programOutputSend(out);
-}
+//void DebugTool::onDebugProcessReadOutput()
+//{
+//    qDebug() << __FUNCTION__;
+//    QByteArray outba = this->m_debugProcess->readAllStandardOutput();
+//    QString out = QString::fromUtf8(outba);
+//    QStringList lines = out.split('\n');
+//    for (int i = 0; i < lines.size(); i++){
+//        if(lines[i].contains("frame")){
+//            i = this->m_debuger->AnalysisFrameInfo(lines, i);
+//            continue;
+//        }
+//        if(lines[i].contains("General Purpose Registers:")){
+//            i = this->m_debuger->AnalysisRegisterInfo(lines, i);
+//            continue;
+//        }
+//    }
+//    m_inbuffer.append(out);
+//    emit programOutputSend(out);
+//}
 
 
 void DebugTool::Complie()
@@ -269,17 +268,11 @@ void DebugTool::Complie()
 void DebugTool::DebugTarget()
 {
     if (this->m_complieSucessed){
-        QStringList  paramList;
-        paramList << "--debug";
-        paramList << this->m_target.absolutePath() + "/" + this->m_target.baseName();
-        this->m_debugProcess->start("lldb", paramList);
+        this->m_debuger->Debug(this->m_target.absolutePath() + "/" + this->m_target.baseName());
 
+        this->m_debuger->AddBreakPoint("main");
 
-        QString cmd = "breakpoint set -n main\n";
-        this->m_debugProcess->write(cmd.toLocal8Bit());
-
-        this->m_debugProcess->write("run\n");
-        this->m_debugProcess->waitForBytesWritten();
+        this->m_debuger->Run();
     }
 }
 

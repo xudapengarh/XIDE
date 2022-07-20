@@ -16,6 +16,7 @@ public:
     // Debuger interface
 public:
     bool Debug(QString processName) override;
+    void SetFrameType(FrameType type) override;
     void Run() override;
     void Continue() override;
     void Next() override;
@@ -30,10 +31,21 @@ private slots:
     void onProcessReadOutput() override;
     void onProcessReadError() override;
 
-public:
+private:
     void OutputFilter() override;
     int AnalysisFrameInfo(QStringList &lines, int index) override;
     int AnalysisRegisterInfo(QStringList &lines, int index) override;
+    int AnalysisFrameVariableInfo(QStringList &lines, int index) override;
+
+private:
+    void GetRegisters();
+    void GetFrameVariable();
+
+private:
+    FrameType m_frameType;
+    bool m_frameUpdateFlag;
+    bool m_registerUpdateFlag;
+
 };
 
 #endif // LLDBDEBUGER_H

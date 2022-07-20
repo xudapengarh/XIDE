@@ -19,10 +19,12 @@ BuildAndDebugTools::BuildAndDebugTools(QWidget *parent) : QWidget(parent)
     }
 
     this->m_messageBrowser = new QTextBrowser(this);
+    this->m_frameVariableBrowser = new FrameVariableBrowser(this);
 
     QGridLayout *glayout = new QGridLayout(this);
-    glayout->addWidget(this->m_tooBar, 0, 0);
-    glayout->addWidget(this->m_messageBrowser, 1, 0);
+    glayout->addWidget(this->m_tooBar, 0, 0, 1, 2);
+    glayout->addWidget(this->m_messageBrowser, 1, 0, 1, 1);
+    glayout->addWidget(this->m_frameVariableBrowser, 1, 2, 1, 1);
     glayout->setSpacing(10);
     glayout->setMargin(0);
 
@@ -33,6 +35,9 @@ BuildAndDebugTools::BuildAndDebugTools(QWidget *parent) : QWidget(parent)
 
     connect(this->m_runTool, &RunTool::programOutputSend, this, &BuildAndDebugTools::onShowMessage);
     connect(this->m_debugTool, &DebugTool::programOutputSend, this, &BuildAndDebugTools::onShowMessage);
+    connect(this->m_debugTool, &DebugTool::updateFrame, this, &BuildAndDebugTools::onUpdateFrame);
+    connect(this->m_debugTool, &DebugTool::updateRegisters, this, &BuildAndDebugTools::onUpdateRegisters);
+    connect(this->m_debugTool, &DebugTool::updateFrameVariable, this->m_frameVariableBrowser, &FrameVariableBrowser::onUpdateFrameVariable);
 }
 
 void BuildAndDebugTools::resizeEvent(QResizeEvent *event)
@@ -56,4 +61,14 @@ void BuildAndDebugTools::onCurrentCodeFileChanged(const QFileInfo &fileInfo){
 void BuildAndDebugTools::onShowMessage(QString message)
 {
     this->m_messageBrowser->append(message);
+}
+
+void BuildAndDebugTools::onUpdateFrame(const FrameInfo &frame)
+{
+    emit updateFrame(frame.file, frame.currentLine);
+}
+
+void BuildAndDebugTools::onUpdateRegisters(const RegisterGroup &registers)
+{
+    emit updateRegisters(registers);
 }
