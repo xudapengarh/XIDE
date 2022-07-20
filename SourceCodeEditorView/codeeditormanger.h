@@ -22,6 +22,7 @@ signals:
 public slots:
     void onOpenFile(QFileInfo fileInfo);
     void onCloseFile(QFileInfo fileInfo);
+    void onUpdateFrame(const QString &file, const int &currentLine);
 
 private:
 

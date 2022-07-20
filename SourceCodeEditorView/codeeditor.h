@@ -16,7 +16,7 @@ class CodeEditor : public QWidget
 public:
     CodeEditor(QWidget *parent = nullptr);
     void OpenFile(QFileInfo fileInfo);
-
+    void SetAimLine(const int line);
     inline QFileInfo GetCodeFileInfo(){return this->m_codeFileInfo;}
 
 private:

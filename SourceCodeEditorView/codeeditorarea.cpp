@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QPainter>
 #include <QTextBlock>
+#include <QScrollBar>
 
 #include "codeeditorarea.h"
 
@@ -16,6 +17,36 @@ CodeEditorArea::CodeEditorArea(QWidget *parent) : QPlainTextEdit(parent)
 
     // 绑定更新事件
     connect(this, &CodeEditorArea::updateRequest, this, &CodeEditorArea::onUpdateRequest);
+}
+
+void CodeEditorArea::SetAimLine(const int line)
+{
+
+    QTextCursor tc = this->textCursor();                // 获取鼠标焦点
+    // 设置鼠标位置
+    int position = document()->findBlockByNumber(line - 1).position();
+    tc.setPosition(position,QTextCursor::MoveAnchor);
+
+
+    QList<QTextEdit::ExtraSelection> extraSelections;   // 提供一种方式显示选择的文本
+    extraSelections = this->extraSelections();          // 获取之前高亮的设置
+    extraSelections.clear();                            // 清除之前的高亮
+    QTextEdit::ExtraSelection selection;
+
+    selection.format.setBackground(QColor(200, 200, 0));
+    selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+    selection.cursor = tc;
+    extraSelections.append(selection);
+    this->setExtraSelections(extraSelections);//设置高亮
+    this->setTextCursor(tc);
+    this->ensureCursorVisible();
+    this->setFocus();
+
+    int lastBlockPosition = document()->findBlockByNumber(this->blockCount() - 1).position();
+    double scr = ((double)position - (double)this->height() / 2) / lastBlockPosition * 100.0;
+
+    QScrollBar *scb = this->verticalScrollBar();
+    scb->setValue(scr);
 }
 
 void CodeEditorArea::OpenFile(QFileInfo fileInfo)

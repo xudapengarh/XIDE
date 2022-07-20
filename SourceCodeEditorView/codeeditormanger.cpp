@@ -43,6 +43,18 @@ void CodeEditorManger::onCloseFile(QFileInfo fileInfo)
     }
 }
 
+void CodeEditorManger::onUpdateFrame(const QString &file, const int &currentLine)
+{
+    QMap<QString, CodeEditor*>::iterator it = this->m_openedEditor.begin();
+    while(it != this->m_openedEditor.end()){
+        if (it.key().contains(file)){
+            this->setCurrentWidget(it.value());
+            it.value()->SetAimLine(currentLine);
+            it++;
+        }
+    }
+}
+
 
 
 

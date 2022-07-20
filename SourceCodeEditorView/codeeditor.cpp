@@ -40,3 +40,8 @@ void CodeEditor::OpenFile(QFileInfo fileInfo)
     this->m_editorArea->OpenFile(fileInfo);
     this->m_codeFileInfo = fileInfo;
 }
+
+void CodeEditor::SetAimLine(const int line)
+{
+    this->m_editorArea->SetAimLine(line);
+}

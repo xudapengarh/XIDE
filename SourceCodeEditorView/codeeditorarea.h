@@ -38,6 +38,8 @@ class CodeEditorArea : public QPlainTextEdit
 public:
     CodeEditorArea(QWidget *parent = nullptr);
 
+    void SetAimLine(const int line);
+
 public slots:
     void OpenFile(QFileInfo fileInfo);  // 打开文件
     void SaveFile();                    // 保存已打开的文件
