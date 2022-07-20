@@ -13,6 +13,7 @@
 #include "../MassageBrowserView/massagebrowserview.h"
 #include "../VariablesBrowserView/variablesbrowserview.h"
 #include "../ProjectFilesTreeView/createnewdialog.h"
+#include "../GDBControllerView/registerbrowser.h"
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -23,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     this->m_sourceCodeEditorView = new CodeEditorManger(this);
     this->m_gdbControllerView = new BuildAndDebugTools(this);
-
+    this->m_registerBrowserView = new RegisterBrowser(this);
 //    this->m_massageBrowserView = new MassageBrowserView(this);
 //    this->m_variablesBrowserView = new VariablesBrowserView(this);
 //    this->m_expressionBrowserView = new ExpressionBrowserView(this);
@@ -35,23 +36,15 @@ MainWindow::MainWindow(QWidget *parent)
         QSplitter *vlayout = new QSplitter(Qt::Vertical, 0);
         vlayout->addWidget(this->m_sourceCodeEditorView);
         vlayout->addWidget(this->m_gdbControllerView);
-//        vlayout->addWidget(this->m_massageBrowserView);
         vlayout->setStretchFactor(0, 70);
         vlayout->setStretchFactor(1, 30);
-//        vlayout->setStretchFactor(2, 30);
         hlayout->addWidget(vlayout);
     }
 
-//    {
-//        QSplitter *vlayout = new QSplitter(Qt::Vertical, 0);
-//        vlayout->addWidget(this->m_variablesBrowserView);
-//        vlayout->addWidget(this->m_expressionBrowserView);
-//        hlayout->addWidget(vlayout);
-//    }
-
-    hlayout->setStretchFactor(0, 30);
-    hlayout->setStretchFactor(1, 70);
-//    hlayout->setStretchFactor(2, 20);
+    hlayout->addWidget(this->m_registerBrowserView);
+    hlayout->setStretchFactor(0, 20);
+    hlayout->setStretchFactor(1, 60);
+    hlayout->setStretchFactor(2, 20);
 
 
     this->setCentralWidget(hlayout);
@@ -70,6 +63,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this->m_projectFileTreeView, &ProjectFileTreeView::closeFile, this->m_sourceCodeEditorView, &CodeEditorManger::onCloseFile);
 
     connect(this->m_sourceCodeEditorView, &CodeEditorManger::currentCodeFileChanged, this->m_gdbControllerView, &BuildAndDebugTools::onCurrentCodeFileChanged);
+    connect(this->m_gdbControllerView, &BuildAndDebugTools::updateFrame, this->m_sourceCodeEditorView, &CodeEditorManger::onUpdateFrame);
+    connect(this->m_gdbControllerView, &BuildAndDebugTools::updateRegisters, this->m_registerBrowserView, &RegisterBrowser::onUpdateRegisters);
 
 //    connect(this->m_gdbControllerView, &BuildAndDebugTools::massageSend, this->m_massageBrowserView, &MassageBrowserView::onShowMassage);
 }

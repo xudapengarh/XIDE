@@ -11,6 +11,8 @@ class BuildAndDebugTools;        // GDB 控制视图
 class VariablesBrowserView;     // 变量监视视图
 class MassageBrowserView;       // 消息显示视图
 class ExpressionBrowserView;    // 表达式监视视图
+
+class RegisterBrowser;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -31,7 +33,7 @@ private:
     MassageBrowserView *m_massageBrowserView;         // 消息显示视图
     ExpressionBrowserView *m_expressionBrowserView;   // 表达式监视视图
     VariablesBrowserView *m_variablesBrowserView;     // 变脸监视视图
-
+    RegisterBrowser *m_registerBrowserView;
 private:
     QMenuBar *m_menuBar;
 };
